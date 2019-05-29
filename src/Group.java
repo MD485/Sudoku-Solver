@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.function.BiPredicate;
 
 public class Group {
@@ -58,17 +57,13 @@ public class Group {
         getUniqueSets(possibilities, uniqueSets);
 
         for(HashSet<Integer> set : uniqueSets) {
-            BiPredicate<Tile, HashSet<Integer>> nakedTuple = Tile::contains;
+            //Originally there was more predicates defined in the tile class, but after
+            // some experimentation I found out that this method covers all of them anyway.
             BiPredicate<Tile, HashSet<Integer>> hiddenTuple = Tile::containsSome;
-            BiPredicate<Tile, HashSet<Integer>> hiddenIncompleteTuple = Tile::containsOnly;
 
-            /*if (tupleCheck(set, nakedTuple)) {
-                reduceTupleSet(set, nakedTuple);
-            } else if (tupleCheck(set, hiddenIncompleteTuple)) {
-                reduceTupleSet(set, hiddenIncompleteTuple);
-            }  else */ if (tupleCheck(set, hiddenTuple)) {
+            if (tupleCheck(set, hiddenTuple)) {
                 reduceTupleSet(set, hiddenTuple);
-            } //*/
+            }
         }
     }
 
@@ -79,7 +74,7 @@ public class Group {
     private boolean tupleCheck(HashSet<Integer> set,
                                BiPredicate<Tile,HashSet<Integer>> predicate) {
         //Used as a counter to see how many instances there are relative to the set size.
-        Integer currentAmount = new Integer(set.size());
+        int currentAmount = set.size();
         for (Tile t : tiles) {
             if (predicate.test(t,set)) {
                 currentAmount -= 1;
@@ -93,12 +88,14 @@ public class Group {
         for (Tile t : tiles) {
             if (predicate.test(t,set)) {
                 t.setPossibilities(set);
-            } else {
-                t.removePossibilities(set);
             }
         }
     }
 
+    //Gets all valid unique subsets of a given hashSets and puts them in an given arraylist of
+    // hashSets. It does this by adding the initial set to the arraylist, generating every unique
+    // set which can be made by removing a single element of the input set, then, if the set isn't
+    // empty or already contained within the arraylist, it's added to it.
     private void getUniqueSets(HashSet<Integer> possibilities,
                                ArrayList<HashSet<Integer>> applyTo) {
         Iterator<Integer> hashIterator = possibilities.iterator();
@@ -113,32 +110,4 @@ public class Group {
         }
     }
 
-    public int state() {
-        Optional<Integer> state = tiles.stream().map(Tile::size).reduce((X, Y) -> X + Y);
-        return state.orElse(0);
-    }
-
-    public Integer uniqueSubset(Integer value) {
-        int subBoxes = (int) Math.round(Math.sqrt(tiles.size()));
-        HashSet<Integer> valContainedInIndex = new HashSet<>();
-        for (int i = 0; i < subBoxes; i++) {
-            for (int j = 0; j < subBoxes; j++) {
-                if(tiles.get(i*subBoxes + j).getPossibilties().contains(value)) {
-                    valContainedInIndex.add(i);
-                }
-            }
-        }
-        if(valContainedInIndex.size() == 1) {
-            return valContainedInIndex.iterator().next();
-        } else {
-            return 0;
-        }
-    }
-
-    public void removeFromSubset(HashSet<Integer> value, int subSet) {
-        int subBoxes = (int) Math.round(Math.sqrt(tiles.size()));
-        for (int i = 0; i < subBoxes; i++) {
-            tiles.get(i + subSet*subBoxes).removePossibilities(value);
-        }
-    }
 }

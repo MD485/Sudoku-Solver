@@ -12,6 +12,8 @@ public class Tile {
         ALL_POSSIBILITIES = new HashSet<>(Arrays.asList(1,2,3,4,5,6,7,8,9));
     }
 
+    //The Tile class defaults to a 9x9 board but you can change the amount to 4x4 or 16x16 here
+    // before
     static void changeMaxPossibilities(Integer boardSize) {
         ALL_POSSIBILITIES.clear();
         //This would be shorter/clearer as a for, I just wanted to experiment with streams.
@@ -51,20 +53,13 @@ public class Tile {
         }
     }
 
-    public boolean containsOnly(HashSet<Integer> inputSet) {
-        return ((inputSet.size() == possibilities.size()) && (possibilities.containsAll(inputSet)));
-    }
-
     public boolean containsSome(HashSet<Integer> inputSet) {
         for (Integer input : inputSet) {
-            if (possibilities.contains(input))
+            if (possibilities.contains(input)) {
                 return true;
+            }
         }
         return false;
-    }
-
-    public boolean contains(HashSet<Integer> inputSet) {
-        return possibilities.contains(inputSet);
     }
 
     public Integer size() {

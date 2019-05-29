@@ -1,6 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 
 public class Board {
 
@@ -20,7 +18,9 @@ public class Board {
             return;
         }
 
-        Tile.changeMaxPossibilities(boardSize);
+        if (boardSize != 9) {
+            Tile.changeMaxPossibilities(boardSize);
+        }
 
         initRowsColumnsBoxes(boardSize);
         fillBoard(boardSize, sqrtInput, input);
@@ -86,62 +86,21 @@ public class Board {
     public void solve() {
         do {
             printState();
-            boolean unchanged = true;
             for (ArrayList<Group> groups : RCBGroups) {
                 for (Group g : groups) {
-                    int currentState = g.state();
                     if (!g.solved()) {
                         g.narrowDown();
-                        if (currentState != g.state()) {
-                            unchanged = false;
-                        }
                     }
                 }
-            }
-            if (unchanged) {
-                System.out.println("Unchanged");
-                boardLevelReduction();
             }
         } while (notSolved());
-    }
-
-    private void boardLevelReduction() {
-        int subBoxes = (int) Math.round(Math.sqrt(Math.sqrt(allPossibilities.size())));
-        for (ArrayList<Group> RCB : RCBGroups) {
-            lineReduction(RCB, subBoxes);
-        }
-    }
-
-    private void lineReduction(ArrayList<Group> groups, int subBoxes) {
-        for (int i = 0; i < subBoxes; i++) {
-            for (int j = 0; j < subBoxes; j++) {
-                for(Integer variable : Tile.ALL_POSSIBILITIES) {
-                    int self = (i * subBoxes + j);
-                    int subSet = groups.get(self).uniqueSubset(variable);
-                    if(subSet != 0) {
-                        lineReduce(groups, i, subSet, self, subBoxes,
-                                new HashSet<>(Collections.singletonList(variable)));
-                    }
-                }
-            }
-        }
-    }
-
-    public void lineReduce(ArrayList<Group> groups, int rowBox, int subSet, int self,
-                           int subBoxes, HashSet<Integer> variable) {
-        int maxOfSet = ((rowBox + 1) * subBoxes);
-        for(int i = rowBox*subBoxes; i < maxOfSet; i++) {
-            if (i != self) {
-                groups.get(i).removeFromSubset(variable, subSet);
-            }
-        }
     }
 
     public void printState() {
         printState(false);
     }
 
-    public void printState(boolean debugMode) {
+    private void printState(boolean debugMode) {
         //Maybe boardSize should be a class variable given it's ubiquity.
         int boardSize = (int) Math.sqrt(allPossibilities.size());
         int indent = (int) Math.sqrt(boardSize);
